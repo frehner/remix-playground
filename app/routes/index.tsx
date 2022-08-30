@@ -3,16 +3,44 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Image } from "@shopify/hydrogen-ui-alpha";
 import type {
-  Image as ImageType,
+  ProductConnection as ProductConnectionType,
   Shop as ShopType,
 } from "@shopify/hydrogen-ui-alpha/storefront-api-types";
+import { gql } from "graphql-request";
+
+const query = gql`
+  {
+    shop {
+      name
+    }
+    products(first: 1) {
+      nodes {
+        id
+        title
+        publishedAt
+        handle
+        variants(first: 1) {
+          nodes {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 export const loader: LoaderFunction = async () => {
   const req = await fetch(
     `https://hydrogen-preview.myshopify.com/api/2022-07/graphql.json`,
     {
       method: "POST",
-      body: `query ShopName { shop { name } }`,
+      body: query,
       headers: {
         "X-Shopify-Storefront-Access-Token": "3b580e70970c4528da70c98e097c2fa0",
         "content-type": "application/graphql",
@@ -27,8 +55,12 @@ export const loader: LoaderFunction = async () => {
 };
 
 export default function Index() {
-  const data = useLoaderData<{ data: { shop: ShopType } }>();
-  console.log(data.data.shop.name);
+  const data = useLoaderData<{
+    data: { shop: ShopType; products: ProductConnectionType };
+  }>();
+
+  const image = data.data.products.nodes[0].variants.nodes[0].image;
+
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
       <h1>Welcome to Remix</h1>
@@ -57,8 +89,7 @@ export default function Index() {
           </a>
         </li>
       </ul>
-      Image:
-      {/* <Image data={data} /> */}
+      {image && <Image data={image} width={500} />}
     </div>
   );
 }
