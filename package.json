@@ -10,7 +10,7 @@
     "@remix-run/node": "^1.7.0",
     "@remix-run/react": "^1.7.0",
     "@remix-run/serve": "^1.7.0",
-    "@shopify/hydrogen-ui-alpha": "^2022.7.2",
+    "@shopify/hydrogen-react": "^0.0.0-next-5229051",
     "graphql": "^16.6.0",
     "graphql-request": "^5.0.0",
     "react": "^18.2.0",

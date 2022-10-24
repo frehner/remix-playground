@@ -1,12 +1,13 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { Image } from "@shopify/hydrogen-ui-alpha";
+import { Image } from "@shopify/hydrogen-react";
 import type {
   ProductConnection as ProductConnectionType,
   Shop as ShopType,
-} from "@shopify/hydrogen-ui-alpha/storefront-api-types";
+} from "@shopify/hydrogen-react/storefront-api-types";
 import { gql } from "graphql-request";
+import { storefrontClient } from "../shopify-client";
 
 const query = gql`
   {
@@ -35,18 +36,22 @@ const query = gql`
   }
 `;
 
+export function meta() {
+  return {
+    title: "Remix: Hydrogen",
+  };
+}
+
 export const loader: LoaderFunction = async () => {
-  const req = await fetch(
-    `https://hydrogen-preview.myshopify.com/api/2022-07/graphql.json`,
-    {
-      method: "POST",
-      body: query,
-      headers: {
-        "X-Shopify-Storefront-Access-Token": "3b580e70970c4528da70c98e097c2fa0",
-        "content-type": "application/graphql",
-      },
-    }
-  );
+  // console.log(storefrontClient.getPublicTokenHeaders());
+  const req = await fetch(storefrontClient.getStorefrontApiUrl(), {
+    method: "POST",
+    body: query,
+    headers: {
+      ...storefrontClient.getPublicTokenHeaders({ contentType: "graphql" }),
+      // "content-type": "application/json",
+    },
+  });
 
   const reqJson = await req.json();
   // console.log(reqJson);
@@ -89,7 +94,7 @@ export default function Index() {
           </a>
         </li>
       </ul>
-      {image && <Image data={image} width={500} />}
+      {image && <Image data={image} width={500} widths={[500]} />}
     </div>
   );
 }
